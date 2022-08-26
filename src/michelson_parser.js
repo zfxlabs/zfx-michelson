@@ -63,7 +63,10 @@ const read = (callback) => {
 
 //FIXME: idk if we need this async actually, just keeping the same API for now
 const onEncode = async (id, content) => {
-respond(id, { status: "success" });
+  const { schema, data } = content;
+  const taquito_schema = new Schema(schema);
+  const michelson = taquito_schema.Encode(data);
+  respond(id, { status: "success" , michelson });
 }
 
 //FIXME: idk if we need this async actually, just keeping the same API for now
