@@ -1,8 +1,6 @@
 "use strict";
 
-const { TezosToolkit, OpKind } = require("@taquito/taquito");
-const { RpcClient } = require("@taquito/rpc");
-const { InMemorySigner } = require("@taquito/signer");
+const { Schema } = require("@taquito/michelson-encoder"); 
 const { pipeline, Transform } = require("stream");
 const { inspect } = require("util");
 
@@ -70,7 +68,10 @@ respond(id, { status: "success" });
 
 //FIXME: idk if we need this async actually, just keeping the same API for now
 const onDecode = async (id, content) => {
-    respond(id, { status: "success" });
+  const { schema, michelson } = content;
+  const taquito_schema = new Schema(schema);
+  const data = taquito_schema.Execute(michelson);
+  respond(id, { status: "success", data });
 }
 
 const onRequest = (id, content) => {
