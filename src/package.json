@@ -1,0 +1,16 @@
+{
+  "name": "sidechain",
+  "version": "0.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "@taquito/rpc": "^11.2.0",
+    "@taquito/signer": "^11.2.0",
+    "@taquito/taquito": "^11.2.0",
+    "taquito": "^1.0.0",
+    "webpack": "^5.47.1",
+    "webpack-cli": "^4.7.1"
+  },
+  "devDependencies": {
+    "prettier": "^2.3.2"
+  }
+}
