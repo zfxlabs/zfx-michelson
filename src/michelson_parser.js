@@ -65,12 +65,12 @@ const read = (callback) => {
 
 //FIXME: idk if we need this async actually, just keeping the same API for now
 const onEncode = async (id, content) => {
-respond(id, { status: "success" });
+respond(id, { status: "success", value: "" });
 }
 
 //FIXME: idk if we need this async actually, just keeping the same API for now
 const onDecode = async (id, content) => {
-    respond(id, { status: "success" });
+    respond(id, { status: "success", value: ""});
 }
 
 const onRequest = (id, content) => {

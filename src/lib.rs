@@ -4,6 +4,10 @@ pub mod prelude;
 #[derive(Debug)]
 pub enum Error {
     IoError(std::io::Error),
+    ReadNone,
+    IdMismatch,
+    EncodeError,
+    DecodeError,
 }
 
 impl std::error::Error for Error {}
