@@ -25,15 +25,15 @@ struct Response {
 #[derive(Clone, Debug, Serialize)]
 #[serde(tag = "kind")]
 pub enum RequestContent {
-    Encode {},
-    Decode {},
+    Encode { data: Value, schema: Value },
+    Decode { michelson: Value, schema: Value },
 }
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(tag = "status")]
 pub enum ResponseContent {
     success { value: Value },
-    error {},
+    error { error: Value },
 }
 
 pub struct Parser {
@@ -60,10 +60,10 @@ impl Parser {
         }
     }
 
-    pub async fn encode(&mut self) -> Result<Value> {
+    pub async fn encode(&mut self, data: Value, schema: Value) -> Result<Value> {
         let id = self.current_id;
         self.current_id += 1;
-        let content = RequestContent::Encode {};
+        let content = RequestContent::Encode { data, schema };
         submit(&mut self.stdin, id, content).await;
         let encoded_response = receive(&mut self.stdout).await.unwrap();
         if encoded_response.id != id {
@@ -71,14 +71,14 @@ impl Parser {
         };
         match encoded_response.content {
             ResponseContent::success { value } => Ok(value),
-            ResponseContent::error {} => Err(Error::EncodeError),
+            ResponseContent::error { error } => Err(Error::EncodeError { error }),
         }
     }
 
-    pub async fn decode(&mut self) -> Result<Value> {
+    pub async fn decode(&mut self, michelson: Value, schema: Value) -> Result<Value> {
         let id = self.current_id;
         self.current_id += 1;
-        let content = RequestContent::Decode {};
+        let content = RequestContent::Decode { michelson, schema };
         submit(&mut self.stdin, id, content).await;
         let decoded_response = receive(&mut self.stdout).await.unwrap();
         if decoded_response.id != id {
@@ -86,7 +86,7 @@ impl Parser {
         };
         match decoded_response.content {
             ResponseContent::success { value } => Ok(value),
-            ResponseContent::error {} => Err(Error::DecodeError),
+            ResponseContent::error { error } => Err(Error::DecodeError { error }),
         }
     }
 }
@@ -106,8 +106,9 @@ async fn receive(stdout: &mut ChildStdout) -> Result<Response> {
     let mut reader = BufReader::new(stdout).lines();
 
     if let Ok(Some(line)) = reader.next_line().await {
+        //println!("line: {:?}", line);
         let response: Response = serde_json::from_str(&line).expect("unable to decode json");
-        println!("response: {:?}", response);
+        //println!("response: {:?}", response);
         Ok(response)
     } else {
         Err(Error::ReadNone)
