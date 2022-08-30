@@ -1,8 +1,6 @@
 "use strict";
 
-const { TezosToolkit, OpKind } = require("@taquito/taquito");
-const { RpcClient } = require("@taquito/rpc");
-const { InMemorySigner } = require("@taquito/signer");
+const { Schema } = require("@taquito/michelson-encoder"); 
 const { pipeline, Transform } = require("stream");
 const { inspect } = require("util");
 
@@ -65,12 +63,18 @@ const read = (callback) => {
 
 //FIXME: idk if we need this async actually, just keeping the same API for now
 const onEncode = async (id, content) => {
-respond(id, { status: "success", value: "" });
+  const { schema, data } = content;
+  const taquito_schema = new Schema(schema);
+  const value = taquito_schema.Encode(data);
+  respond(id, { status: "success" , value });
 }
 
 //FIXME: idk if we need this async actually, just keeping the same API for now
 const onDecode = async (id, content) => {
-    respond(id, { status: "success", value: ""});
+  const { schema, michelson } = content;
+  const taquito_schema = new Schema(schema);
+  const value = taquito_schema.Execute(michelson);
+  respond(id, { status: "success", value });
 }
 
 const onRequest = (id, content) => {
