@@ -1,6 +1,7 @@
 "use strict";
 
-const { Schema } = require("@taquito/michelson-encoder"); 
+const { MichelsonMap } = require("@taquito/taquito");
+const { Schema } = require("@taquito/michelson-encoder");
 const { pipeline, Transform } = require("stream");
 const { inspect } = require("util");
 
@@ -61,11 +62,29 @@ const read = (callback) => {
   pipeline(process.stdin, parseStream, errorHandler).on("data", callback);
 };
 
+/* Convert `map`s and `big_map`s coming from Rust to Taquito's own `MichelsonMap` class
+
+  Note that only the top-level fields of `data` are processed, there's no recursive descent
+  for converting embedded maps. This is consistent with Taquito's behaviour expecting a flat object.
+*/
+const convert_maps = (data) => {
+  for(const field in data) {
+    if(typeof data[field] === 'object') {
+      let mmap = data[field]["MichelsonMap"];
+      if(mmap !== undefined) {
+        data[field] = MichelsonMap.fromLiteral(mmap);
+      }
+    }
+  }
+  return data;
+};
+
 //FIXME: idk if we need this async actually, just keeping the same API for now
 const onEncode = async (id, content) => {
   const { schema, data } = content;
   const taquito_schema = new Schema(schema);
-  const value = taquito_schema.Encode(data);
+  const preprocessed_data = convert_maps(data);
+  const value = taquito_schema.Encode(preprocessed_data);
   respond(id, { status: "Success" , value });
 }
 
