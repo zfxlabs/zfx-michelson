@@ -66,7 +66,7 @@ const onEncode = async (id, content) => {
   const { schema, data } = content;
   const taquito_schema = new Schema(schema);
   const value = taquito_schema.Encode(data);
-  respond(id, { status: "success" , value });
+  respond(id, { status: "Success" , value });
 }
 
 //FIXME: idk if we need this async actually, just keeping the same API for now
@@ -74,7 +74,7 @@ const onDecode = async (id, content) => {
   const { schema, michelson } = content;
   const taquito_schema = new Schema(schema);
   const value = taquito_schema.Execute(michelson);
-  respond(id, { status: "success", value });
+  respond(id, { status: "Success", value });
 }
 
 const onRequest = (id, content) => {
@@ -91,7 +91,7 @@ read((request) => {
     const { id, content } = request;
   onRequest(id, content)
     .catch((err) => {
-      const status = "error";
+      const status = "Error";
       const error = inspect(err);
       respond(id, { status, error });
     })

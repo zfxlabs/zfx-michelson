@@ -3,7 +3,6 @@ use crate::{Error, Result};
 
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
-//use serde_json::Result;
 
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{ChildStdin, ChildStdout, Command};
@@ -32,8 +31,8 @@ pub enum RequestContent {
 #[derive(Clone, Debug, Deserialize)]
 #[serde(tag = "status")]
 pub enum ResponseContent {
-    success { value: Value },
-    error { error: Value },
+    Success { value: Value },
+    Error { error: Value },
 }
 
 pub struct Parser {
@@ -70,8 +69,8 @@ impl Parser {
             return Err(Error::IdMismatch);
         };
         match encoded_response.content {
-            ResponseContent::success { value } => Ok(value),
-            ResponseContent::error { error } => Err(Error::EncodeError { error }),
+            ResponseContent::Success { value } => Ok(value),
+            ResponseContent::Error { error } => Err(Error::EncodeError { error }),
         }
     }
 
@@ -85,8 +84,8 @@ impl Parser {
             return Err(Error::IdMismatch);
         };
         match decoded_response.content {
-            ResponseContent::success { value } => Ok(value),
-            ResponseContent::error { error } => Err(Error::DecodeError { error }),
+            ResponseContent::Success { value } => Ok(value),
+            ResponseContent::Error { error } => Err(Error::DecodeError { error }),
         }
     }
 }
