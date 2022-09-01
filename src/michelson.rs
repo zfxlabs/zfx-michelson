@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use crate::{Error, Result};
 
 use serde::{Deserialize, Serialize};
@@ -8,6 +7,8 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{ChildStdin, ChildStdout, Command};
 
 use std::process::Stdio;
+
+pub type MichelsonV1Expression = Value;
 
 #[derive(Clone, Debug, Serialize)]
 struct Request {
@@ -43,7 +44,7 @@ pub struct Parser {
 
 impl Parser {
     pub fn new() -> Parser {
-        let mut child = tokio::process::Command::new("node")
+        let mut child = Command::new("node")
             .current_dir("./src")
             .args(&["michelson_parser.js"]) //FIXME: config
             .stdin(Stdio::piped())
@@ -59,7 +60,11 @@ impl Parser {
         }
     }
 
-    pub async fn encode(&mut self, data: Value, schema: Value) -> Result<Value> {
+    pub async fn encode(
+        &mut self,
+        data: Value,
+        schema: MichelsonV1Expression,
+    ) -> Result<MichelsonV1Expression> {
         let id = self.current_id;
         self.current_id += 1;
         let content = RequestContent::Encode { data, schema };
@@ -74,7 +79,11 @@ impl Parser {
         }
     }
 
-    pub async fn decode(&mut self, michelson: Value, schema: Value) -> Result<Value> {
+    pub async fn decode(
+        &mut self,
+        michelson: MichelsonV1Expression,
+        schema: MichelsonV1Expression,
+    ) -> Result<Value> {
         let id = self.current_id;
         self.current_id += 1;
         let content = RequestContent::Decode { michelson, schema };
@@ -105,9 +114,7 @@ async fn receive(stdout: &mut ChildStdout) -> Result<Response> {
     let mut reader = BufReader::new(stdout).lines();
 
     if let Ok(Some(line)) = reader.next_line().await {
-        //println!("line: {:?}", line);
         let response: Response = serde_json::from_str(&line).expect("unable to decode json");
-        //println!("response: {:?}", response);
         Ok(response)
     } else {
         Err(Error::ReadNone)
