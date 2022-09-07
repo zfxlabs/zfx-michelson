@@ -21,7 +21,6 @@ function test_unit() {
   const data = { a: JsonUnit };
   const expected = { prim: 'Left', args: [ { prim: 'Unit' } ] }
 
-  // Test it!
   const encoded = jsonEncode(enumSchema, data);
   console.log("encoded", encoded);
   assert.deepStrictEqual(encoded, expected);
@@ -31,4 +30,19 @@ function test_unit() {
   assert.deepStrictEqual(back, data);
 }
 
+function test_map() {
+   const sch = { "prim": "map",
+          "args": [ { "prim": "string" }, { "prim": "unit" } ] };
+   const data = {MichelsonMap: { "__enum__": JsonUnit }};
+
+  const encoded = jsonEncode(sch, data);
+  console.log("encoded", JSON.stringify(encoded));
+  //assert.deepStrictEqual(encoded, expected);
+
+  const back = jsonDecode(sch, encoded);
+  console.log("back", back);
+  assert.deepStrictEqual(back, data);
+}
+
 test_unit();
+test_map();
