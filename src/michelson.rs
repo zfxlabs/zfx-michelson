@@ -3,12 +3,17 @@ use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 
+use include_dir::{include_dir, Dir};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{ChildStdin, ChildStdout, Command};
 
 use std::process::Stdio;
 
+use tokio::fs::File;
+
 pub type MichelsonV1Expression = Value;
+
+static PROJECT_DIR: Dir<'_> = include_dir!("./scripts");
 
 #[derive(Clone, Debug, Serialize)]
 struct Request {
@@ -43,9 +48,16 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn new() -> Parser {
+    pub async fn new() -> Parser {
+        println!("project d: {:?}", PROJECT_DIR);
+        let parser_js = PROJECT_DIR.get_file("michelson_parser.js").unwrap();
+        println!("parser: {:?}", parser_js.contents());
+
+        let mut file = File::create("./foo.txt").await.unwrap();
+        file.write_all(parser_js.contents()).await.unwrap();
+
         let mut child = Command::new("node")
-            .current_dir("./src")
+            .current_dir("./scripts")
             .args(&["michelson_parser.js"]) //FIXME: config
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
