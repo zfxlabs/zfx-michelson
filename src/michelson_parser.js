@@ -1,8 +1,8 @@
 "use strict";
 
-const { Schema } = require("@taquito/michelson-encoder"); 
 const { pipeline, Transform } = require("stream");
 const { inspect } = require("util");
+const { jsonEncode, jsonDecode } = require("./json_converter");
 
 const devMode = process.env.NODE_ENV === "development";
 
@@ -61,19 +61,15 @@ const read = (callback) => {
   pipeline(process.stdin, parseStream, errorHandler).on("data", callback);
 };
 
-//FIXME: idk if we need this async actually, just keeping the same API for now
 const onEncode = async (id, content) => {
   const { schema, data } = content;
-  const taquito_schema = new Schema(schema);
-  const value = taquito_schema.Encode(data);
+  const value = jsonEncode(schema, data);
   respond(id, { status: "Success" , value });
 }
 
-//FIXME: idk if we need this async actually, just keeping the same API for now
 const onDecode = async (id, content) => {
   const { schema, michelson } = content;
-  const taquito_schema = new Schema(schema);
-  const value = taquito_schema.Execute(michelson);
+  const value = jsonDecode(schema, michelson);
   respond(id, { status: "Success", value });
 }
 
