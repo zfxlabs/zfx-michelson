@@ -26,7 +26,7 @@ const respond = (id, content) => write({ id, content });
 
 /** @param {RequestCallback} callback */
 const read = (callback) => {
-    let buf = "";
+  let buf = "";
   /* WARNING: inputs are separated by new lines,
     that means each input must be contained in a single line
 
@@ -64,14 +64,14 @@ const read = (callback) => {
 const onEncode = async (id, content) => {
   const { schema, data } = content;
   const value = jsonEncode(schema, data);
-  respond(id, { status: "Success" , value });
-}
+  respond(id, { status: "Success", value });
+};
 
 const onDecode = async (id, content) => {
   const { schema, michelson } = content;
   const value = jsonDecode(schema, michelson);
   respond(id, { status: "Success", value });
-}
+};
 
 const onRequest = (id, content) => {
   if (content.kind === "Encode") {
@@ -84,7 +84,7 @@ const onRequest = (id, content) => {
 };
 
 read((request) => {
-    const { id, content } = request;
+  const { id, content } = request;
   onRequest(id, content)
     .catch((err) => {
       const status = "Error";
