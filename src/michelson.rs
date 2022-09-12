@@ -43,12 +43,12 @@ pub enum ResponseContent {
 }
 
 pub async fn install_parser() {
-    println!("project d: {:?}", SCRIPTS_DIR);
     let parser_js = SCRIPTS_DIR.get_file(BUNDLE_NAME).unwrap();
-    println!("parser: {:?}", parser_js.contents());
-
-    let mut file = File::create(BUNDLE_NAME).await.unwrap();
-    file.write_all(parser_js.contents()).await.unwrap();
+    let mut file_to_deploy = File::create(BUNDLE_NAME).await.unwrap();
+    file_to_deploy
+        .write_all(parser_js.contents())
+        .await
+        .unwrap();
 }
 
 pub struct Parser {
