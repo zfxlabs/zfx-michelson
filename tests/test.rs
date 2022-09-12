@@ -2,10 +2,11 @@ use serde_json::Value;
 use std::fs::File;
 use zfx_michelson::michelson::*;
 
-//#[test]
 #[tokio::test]
 async fn happy_decode() {
-    let mut p = Parser::new().await;
+    zfx_michelson::michelson::install_parser().await;
+    let mut p = Parser::new();
+
     let schema_file = File::open("tests/schema.json").expect("schema file should open read only");
     let schema: Value = serde_json::from_reader(schema_file).expect("file should be proper JSON");
     let michelson_file =

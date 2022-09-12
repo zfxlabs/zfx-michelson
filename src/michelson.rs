@@ -11,9 +11,10 @@ use std::process::Stdio;
 
 use tokio::fs::File;
 
-pub type MichelsonV1Expression = Value;
+static SCRIPTS_DIR: Dir<'_> = include_dir!("./scripts");
+static BUNDLE_NAME: &str = "michelson_parser.bundle.js";
 
-static PROJECT_DIR: Dir<'_> = include_dir!("./scripts");
+pub type MichelsonV1Expression = Value;
 
 #[derive(Clone, Debug, Serialize)]
 struct Request {
@@ -41,6 +42,15 @@ pub enum ResponseContent {
     Error { error: Value },
 }
 
+pub async fn install_parser() {
+    println!("project d: {:?}", SCRIPTS_DIR);
+    let parser_js = SCRIPTS_DIR.get_file(BUNDLE_NAME).unwrap();
+    println!("parser: {:?}", parser_js.contents());
+
+    let mut file = File::create(BUNDLE_NAME).await.unwrap();
+    file.write_all(parser_js.contents()).await.unwrap();
+}
+
 pub struct Parser {
     stdin: ChildStdin,
     stdout: ChildStdout,
@@ -48,17 +58,10 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub async fn new() -> Parser {
-        println!("project d: {:?}", PROJECT_DIR);
-        let parser_js = PROJECT_DIR.get_file("michelson_parser.js").unwrap();
-        println!("parser: {:?}", parser_js.contents());
-
-        let mut file = File::create("./foo.txt").await.unwrap();
-        file.write_all(parser_js.contents()).await.unwrap();
-
+    pub fn new() -> Parser {
         let mut child = Command::new("node")
-            .current_dir("./scripts")
-            .args(&["michelson_parser.js"]) //FIXME: config
+            //.current_dir("./scripts")
+            .args(&[BUNDLE_NAME]) //FIXME: config
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()
