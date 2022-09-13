@@ -1,4 +1,5 @@
 /target
 *~
-src/node_modules
-
+.*.swp
+node_modules
+*.bundle.js*

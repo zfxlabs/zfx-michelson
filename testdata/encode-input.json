@@ -1,6 +1,6 @@
-{ "id": 1, "content": { 
+{ "id": 1, "content": {
 "kind": "Encode",
-"schema": 
+"schema":
 {
   "prim": "pair",
   "args": [
@@ -165,10 +165,22 @@
       ]
     }
   ]
-}, 
+},
 
 
-"data": {"old_validator_map":"4","old_validators":[],"owner":"tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb","state":{},"validator_map":"5","validators":["tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb"]}
+"data": {
+  "old_validator_map": { "MichelsonMap": {} },
+  "old_validators":[],
+  "owner":"tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb",
+  "state":{},
+  "validator_map": { "MichelsonMap" : {
+    "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c" : {
+      "baking_account": "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+      "public_key": "edpku2tvek7QFRYm12819P8RwSY8m7zSzKV9RMnWHy3xVbrBwN5zAg",
+      "tls_cert": ""
+    }
+  } },
+  "validators":["tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb"]}
 
 }}
 

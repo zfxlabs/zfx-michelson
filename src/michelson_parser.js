@@ -1,8 +1,8 @@
 "use strict";
 
-const { Schema } = require("@taquito/michelson-encoder"); 
 const { pipeline, Transform } = require("stream");
 const { inspect } = require("util");
+const { jsonEncode, jsonDecode } = require("./json_converter");
 
 const devMode = process.env.NODE_ENV === "development";
 
@@ -26,7 +26,7 @@ const respond = (id, content) => write({ id, content });
 
 /** @param {RequestCallback} callback */
 const read = (callback) => {
-    let buf = "";
+  let buf = "";
   /* WARNING: inputs are separated by new lines,
     that means each input must be contained in a single line
 
@@ -61,21 +61,17 @@ const read = (callback) => {
   pipeline(process.stdin, parseStream, errorHandler).on("data", callback);
 };
 
-//FIXME: idk if we need this async actually, just keeping the same API for now
 const onEncode = async (id, content) => {
   const { schema, data } = content;
-  const taquito_schema = new Schema(schema);
-  const value = taquito_schema.Encode(data);
-  respond(id, { status: "Success" , value });
-}
+  const value = jsonEncode(schema, data);
+  respond(id, { status: "Success", value });
+};
 
-//FIXME: idk if we need this async actually, just keeping the same API for now
 const onDecode = async (id, content) => {
   const { schema, michelson } = content;
-  const taquito_schema = new Schema(schema);
-  const value = taquito_schema.Execute(michelson);
+  const value = jsonDecode(schema, michelson);
   respond(id, { status: "Success", value });
-}
+};
 
 const onRequest = (id, content) => {
   if (content.kind === "Encode") {
@@ -88,7 +84,7 @@ const onRequest = (id, content) => {
 };
 
 read((request) => {
-    const { id, content } = request;
+  const { id, content } = request;
   onRequest(id, content)
     .catch((err) => {
       const status = "Error";
