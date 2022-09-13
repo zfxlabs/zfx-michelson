@@ -8,7 +8,8 @@
     "@taquito/taquito": "^11.2.0",
     "bignumber.js": "^9.0.2",
     "webpack": "^5.47.1",
-    "webpack-cli": "^4.7.1"
+    "webpack-cli": "^4.7.1",
+    "terser": ">=5.14.2"
   },
   "devDependencies": {
     "prettier": "^2.3.2"
