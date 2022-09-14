@@ -6,7 +6,7 @@ Michelson decoder/encoder library for Rust. Allows parsing michelson expression 
 
 This library needs Node.js 16.
 
-### Summary
+### Summary
 
 The library builds an Rust API layer around the `taquito` library. (See: https://tezostaquito.io/)
 
