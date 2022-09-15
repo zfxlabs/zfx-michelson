@@ -51,6 +51,8 @@ impl<E> From<E> for JsonEnum<E> {
     }
 }
 
+// `From<JsonEnum<E>> for E` can't be implemented
+
 trait JsonWrapper : Clone {
     type JsonType;
 
@@ -59,7 +61,6 @@ trait JsonWrapper : Clone {
     fn from_wrapped_json(value: &Self::JsonType) -> Self;
 }
 
-// `From<JsonEnum<E>> for E` can't be implemented
 
 #[cfg(test)]
 mod test {
