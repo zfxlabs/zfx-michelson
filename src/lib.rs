@@ -1,8 +1,11 @@
 pub mod michelson;
 mod michelson_map;
+mod michelson_types;
 pub mod prelude;
 
+pub use michelson::{Parser, install_parser};
 pub use michelson_map::MichelsonMap;
+pub use michelson_types::*;
 
 use serde_json::value::Value; // FIXME: IDK if this is a good idea here
 

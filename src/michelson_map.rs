@@ -34,7 +34,7 @@ use serde::{Deserialize, Serialize};
 ///  let json = serde_json::to_string(&map).unwrap();
 ///  assert_eq!(json, "{\"MichelsonMap\":{\"foo\":42}}"); // !!!
 ///  ```
-#[derive(Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Serialize, Deserialize)]
 pub struct MichelsonMap<K, V>
 where
     K: PartialEq + Eq + Hash
@@ -100,6 +100,15 @@ where
 {
      fn from(inner: HashMap<K, V>) -> Self {
         MichelsonMap { inner }
+    }
+}
+
+impl<K,V> From<MichelsonMap<K, V>> for HashMap<K, V>
+where
+    K: PartialEq + Eq + Hash
+{
+     fn from(m: MichelsonMap<K, V>) -> Self {
+        m.inner
     }
 }
 
