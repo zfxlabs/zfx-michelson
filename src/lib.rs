@@ -1,3 +1,4 @@
+pub mod micheline;
 pub mod michelson;
 mod michelson_map;
 mod michelson_types;
