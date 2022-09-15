@@ -1,8 +1,18 @@
-//! Various JSON-serialisable that need special encoding logic
+//! Various JSON-serialisable types that need special encoding logic with Taquito
 use serde::{Deserialize, Serialize};
 use std::convert::From;
 
+/// Numbers are generally represented as `String`s (the can are unbounded)
 pub type JsonBigNumber = String;
+
+/// Trait to wrap and unwrap a type from the Taquito/Tezos-specific format
+pub trait JsonWrapper: Clone {
+    type JsonType;
+
+    fn to_wrapped_json(&self) -> Self::JsonType;
+
+    fn from_wrapped_json(value: &Self::JsonType) -> Self;
+}
 
 /// Unambiguous representation of `()` in JSON
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
@@ -11,6 +21,7 @@ pub struct JsonUnit {
 }
 
 impl JsonUnit {
+    /// Return the JSON version of `()`
     pub fn unit() -> Self {
         JsonUnit { __unit__: () }
     }
@@ -28,7 +39,24 @@ impl From<JsonUnit> for () {
     }
 }
 
+impl JsonWrapper for () {
+    type JsonType = JsonUnit;
+
+    fn to_wrapped_json(&self) -> Self::JsonType {
+        JsonUnit::unit()
+    }
+
+    fn from_wrapped_json(_value: &Self::JsonType) -> Self {
+        ()
+    }
+}
+
 /// Unambiguous representation of simple enums in JSON
+///
+/// Note that neither `From<JsonEnum<E>> for E`, nor [`JsonWrapper`]`for E` can be implemented in Rust.
+/// Use [`JsonEnum::wrap`] instead.
+///
+
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
 pub struct JsonEnum<E> {
     __enum__: E,
@@ -42,6 +70,10 @@ impl<E: Clone> JsonEnum<E> {
     pub fn value(&self) -> E {
         self.__enum__.clone()
     }
+
+    pub fn into(self) -> E {
+        self.__enum__
+    }
 }
 
 impl<E> From<E> for JsonEnum<E> {
@@ -50,15 +82,64 @@ impl<E> From<E> for JsonEnum<E> {
     }
 }
 
-// `From<JsonEnum<E>> for E` can't be implemented
+/// Macro to generate the trivial implementations for the [`JsonWrapper`] trait.
+///
+/// ## Examples
+///
+/// ```text
+/// use zfx_michelson::json_wrapper;
+///
+/// json_wrapper!(String as Self);    // No wrapping necessary
+/// json_wrapper!(Vec<T> as Self; T); // Ditto, but with generics
+/// json_wrapper!(u64 as String);      // Wrapped version is a `String`; may panic on unwrapping
+/// ```
+#[macro_export]
+macro_rules! json_wrapper {
+    ($typ:ty as Self) => {
+        impl $crate::JsonWrapper for $typ {
+            type JsonType = $typ;
 
-trait JsonWrapper: Clone {
-    type JsonType;
+            fn to_wrapped_json(&self) -> Self::JsonType {
+                self.clone()
+            }
 
-    fn to_wrapped_json(&self) -> Self::JsonType;
+            fn from_wrapped_json(value: &Self::JsonType) -> Self {
+                value.clone()
+            }
+        }
+    };
+    ($typ:ty as String) => {
+        impl $crate::JsonWrapper for $typ {
+            type JsonType = String;
 
-    fn from_wrapped_json(value: &Self::JsonType) -> Self;
+            fn to_wrapped_json(&self) -> String {
+                self.to_string()
+            }
+
+            fn from_wrapped_json(value: &String) -> Self {
+                value.as_str().parse().expect(format!("JsonWrapper: Unparseable string {:?}", value).as_str())
+            }
+        }
+    };
+    ($typ:ty as Self; $($g:tt),+) => {
+        impl<$($g:std::clone::Clone,)+> $crate::JsonWrapper for $typ {
+            type JsonType = $typ;
+
+            fn to_wrapped_json(&self) -> Self::JsonType {
+                self.clone()
+            }
+
+            fn from_wrapped_json(value: &Self::JsonType) -> Self {
+                value.clone()
+            }
+        }
+    }
 }
+
+json_wrapper!(String as Self);
+json_wrapper!(Vec<T> as Self; T);
+json_wrapper!(u64 as String);
+json_wrapper!(i64 as String);
 
 #[cfg(test)]
 mod test {

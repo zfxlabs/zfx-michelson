@@ -9,6 +9,8 @@ use std::ops::{Deref, DerefMut};
 
 use serde::{Deserialize, Serialize};
 
+use crate::michelson_types::JsonWrapper;
+
 /// `MichelsonMap` is a simple newtype over `HashMap` with a different serialisation format.
 ///
 /// `MichelsonMap` behaves exactly like a `HashMap`, except it is serialised tagged as `MichelsonMap`.
@@ -133,6 +135,24 @@ where
         MichelsonMap {
             inner: HashMap::default(),
         }
+    }
+}
+
+impl<K, V> JsonWrapper for HashMap<K, V>
+where
+    K: PartialEq + Eq + Hash + Clone,
+    V: Clone,
+{
+    type JsonType = MichelsonMap<K, V>;
+
+    fn to_wrapped_json(&self) -> Self::JsonType {
+        MichelsonMap {
+            inner: self.clone(),
+        }
+    }
+
+    fn from_wrapped_json(value: &Self::JsonType) -> Self {
+        value.inner.clone()
     }
 }
 

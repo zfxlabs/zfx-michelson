@@ -33,7 +33,7 @@ pub enum Micheline {
         string: String,
     },
     Bytes {
-        bytes: String,
+        bytes: Bytes,
     },
     Prim {
         prim: Primitive,
