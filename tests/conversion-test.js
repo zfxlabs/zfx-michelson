@@ -3,6 +3,7 @@
 const { jsonEncode, jsonDecode, JsonUnit } = require("../src/json_converter");
 const assert = require("assert");
 
+// Set `PRINT=1` in the environment to see the output
 const PRINT = process.env["PRINT"] ? true : false;
 const print = PRINT ? console.log : () => undefined;
 
@@ -149,6 +150,7 @@ function test_register_storage() {
       { prim: "set", args: [{ prim: "key_hash" }], annots: ["%validators"] },
     ],
   };
+  // print("complex schema:", JSON.stringify(sch, null, 2));
   /*
   {
     state = Genesis;
@@ -249,6 +251,25 @@ function test_register_storage() {
   assert.deepStrictEqual(back, data);
 }
 
+function test_enum_with_parameter() {
+  const sch = { "prim": "or",
+          "args":
+            [ { "prim": "or",
+                "args":
+                  [ { "prim": "int", "annots": [ "%decrement" ] },
+                    { "prim": "int", "annots": [ "%increment" ] } ] },
+              { "prim": "unit", "annots": [ "%reset" ] } ] };
+  const data = { "decrement": "1" };
+  const expected = {"prim":"Left","args":[{"prim":"Left","args":[{"int":"1"}]}]};
+  const encoded = jsonEncode(sch, data);
+  print("encoded", JSON.stringify(encoded));
+  assert.deepStrictEqual(encoded, expected);
+
+  const back = jsonDecode(sch, encoded);
+  print("back", back);
+  assert.deepStrictEqual(back, data);
+}
+
 function fail() {
   assert.deepStrictEqual(0, 1);
 }
@@ -258,3 +279,4 @@ test_unit();
 test_map();
 test_enum();
 test_register_storage();
+ test_enum_with_parameter();
