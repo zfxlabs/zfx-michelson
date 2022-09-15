@@ -1,3 +1,6 @@
+#![doc = include_str!("../README.md")]
+#![doc(html_logo_url = "https://avatars.githubusercontent.com/zfxlabs")]
+
 pub mod micheline;
 pub mod michelson;
 mod michelson_map;

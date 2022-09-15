@@ -16,7 +16,7 @@ The JS code is included in the Rust build, so before starting the node.js proces
 
 ### Example
 
-```
+```text
 use serde_json::Value;
 use zfx_michelson::michelson::*;
 
