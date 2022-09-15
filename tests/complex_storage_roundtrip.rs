@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json::*;
-use zfx_michelson::*;
 use std::collections::HashSet;
+use zfx_michelson::*;
 
 const SCHEMA: &str = r#"{
   "prim": "pair",
@@ -181,26 +181,26 @@ fn remove_nl(input: &str) -> String {
 enum State {
     Genesis,
     Sealed,
-    Open
+    Open,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 struct Registration {
     baking_account: String,
     public_key: String,
-    tls_cert: String // Taquito expects `bytes` as a hex string
+    tls_cert: String, // Taquito expects `bytes` as a hex string
 }
 
 // Target type
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 struct Storage {
-   owner: String,
-   state: JsonEnum<State>,
-   validators: HashSet<String>,
-   validator_map: MichelsonMap<String, Registration>,
-   old_validators: HashSet<String>,
-   // this is kept empty for now, the value in the contract has a rather complex type
-   old_validator_map: MichelsonMap<String, JsonUnit>
+    owner: String,
+    state: JsonEnum<State>,
+    validators: HashSet<String>,
+    validator_map: MichelsonMap<String, Registration>,
+    old_validators: HashSet<String>,
+    // this is kept empty for now, the value in the contract has a rather complex type
+    old_validator_map: MichelsonMap<String, JsonUnit>,
 }
 
 #[tokio::test]
@@ -217,12 +217,15 @@ async fn complex_storage() {
         validators: HashSet::from(["tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c".to_owned()]),
         old_validators: HashSet::default(),
         old_validator_map: MichelsonMap::new(),
-        validator_map: [
-            ("tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c".to_owned(),
-              Registration {
-                  baking_account: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c".to_owned(),
-                  public_key: "edpku2tvek7QFRYm12819P8RwSY8m7zSzKV9RMnWHy3xVbrBwN5zAg".to_owned(),
-                  tls_cert: "DEADBEEF".to_owned()})].into()
+        validator_map: [(
+            "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c".to_owned(),
+            Registration {
+                baking_account: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c".to_owned(),
+                public_key: "edpku2tvek7QFRYm12819P8RwSY8m7zSzKV9RMnWHy3xVbrBwN5zAg".to_owned(),
+                tls_cert: "DEADBEEF".to_owned(),
+            },
+        )]
+        .into(),
     };
     let value = serde_json::to_value(&storage).unwrap();
     println!("DATA: {}", value);

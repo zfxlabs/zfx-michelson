@@ -1,4 +1,3 @@
-
 /// Execute a NodeJS script and check its exit status
 ///
 /// Fails if `node` is not in the `PATH`

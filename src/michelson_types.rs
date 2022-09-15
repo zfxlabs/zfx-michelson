@@ -7,53 +7,52 @@ pub type JsonBigNumber = String;
 /// Unambiguous representation of `()` in JSON
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
 pub struct JsonUnit {
-   __unit__: ()
+    __unit__: (),
 }
 
 impl JsonUnit {
-   pub fn unit() -> Self {
-       JsonUnit { __unit__: () }
+    pub fn unit() -> Self {
+        JsonUnit { __unit__: () }
     }
 }
 
 impl From<()> for JsonUnit {
     fn from(_: ()) -> Self {
-       JsonUnit { __unit__: () }
+        JsonUnit { __unit__: () }
     }
 }
 
 impl From<JsonUnit> for () {
     fn from(_: JsonUnit) -> Self {
-       ()
+        ()
     }
 }
-
 
 /// Unambiguous representation of simple enums in JSON
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
 pub struct JsonEnum<E> {
-   __enum__: E
+    __enum__: E,
 }
 
 impl<E: Clone> JsonEnum<E> {
-   pub fn wrap(e: E) -> Self {
-       JsonEnum { __enum__: e }
-   }
+    pub fn wrap(e: E) -> Self {
+        JsonEnum { __enum__: e }
+    }
 
-   pub fn value(&self) -> E {
-       self.__enum__.clone()
+    pub fn value(&self) -> E {
+        self.__enum__.clone()
     }
 }
 
 impl<E> From<E> for JsonEnum<E> {
     fn from(e: E) -> Self {
-       JsonEnum { __enum__: e }
+        JsonEnum { __enum__: e }
     }
 }
 
 // `From<JsonEnum<E>> for E` can't be implemented
 
-trait JsonWrapper : Clone {
+trait JsonWrapper: Clone {
     type JsonType;
 
     fn to_wrapped_json(&self) -> Self::JsonType;
@@ -61,13 +60,12 @@ trait JsonWrapper : Clone {
     fn from_wrapped_json(value: &Self::JsonType) -> Self;
 }
 
-
 #[cfg(test)]
 mod test {
-   use std::collections::HashMap;
-   use super::*;
-   use crate::MichelsonMap;
-   use serde_json;
+    use super::*;
+    use crate::MichelsonMap;
+    use serde_json;
+    use std::collections::HashMap;
 
     #[test]
     fn test_basic_serialise_unit() {
@@ -81,7 +79,10 @@ mod test {
     }
 
     #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
-    enum E { A, B }
+    enum E {
+        A,
+        B,
+    }
 
     #[test]
     fn test_basic_serialise_enum() {
@@ -101,8 +102,8 @@ mod test {
         m: MichelsonMap<String, usize>,
         b: JsonBigNumber,
         i: isize,
-        s: String
-   }
+        s: String,
+    }
 
     #[test]
     fn test_serialise_struct() {
@@ -112,7 +113,7 @@ mod test {
             m: MichelsonMap::new(),
             b: "42".to_owned(),
             i: 1,
-            s: "foo".to_owned()
+            s: "foo".to_owned(),
         };
         let json = serde_json::to_string(&s).unwrap();
         let expected = "{\"u\":{\"__unit__\":null},\"e\":{\"__enum__\":\"A\"},\
@@ -130,52 +131,52 @@ mod test {
         m: HashMap<String, usize>,
         b: i64,
         i: isize,
-        s: String
-   }
+        s: String,
+    }
 
-   fn convert_struct(s: S) -> RustStruct {
-       RustStruct {
-           u: s.u.into(),
-           e: s.e.value(),
-           m: s.m.into(),
-           b: s.b.parse().unwrap(),
-           i: s.i,
-           s: s.s
-       }
-   }
+    fn convert_struct(s: S) -> RustStruct {
+        RustStruct {
+            u: s.u.into(),
+            e: s.e.value(),
+            m: s.m.into(),
+            b: s.b.parse().unwrap(),
+            i: s.i,
+            s: s.s,
+        }
+    }
 
-  fn convert_struct_back(r: RustStruct) -> S {
-       S {
-           u: r.u.into(),
-           e: JsonEnum::wrap(r.e),
-           m: r.m.into(),
-           b: r.b.to_string(),
-           i: r.i,
-           s: r.s
-       }
-   }
+    fn convert_struct_back(r: RustStruct) -> S {
+        S {
+            u: r.u.into(),
+            e: JsonEnum::wrap(r.e),
+            m: r.m.into(),
+            b: r.b.to_string(),
+            i: r.i,
+            s: r.s,
+        }
+    }
 
-   #[test]
-   fn test_rustify() {
+    #[test]
+    fn test_rustify() {
         let s = S {
             u: JsonUnit::unit(),
             e: JsonEnum::wrap(E::A),
             m: MichelsonMap::new(),
             b: "42".to_owned(),
             i: 1,
-            s: "foo".to_owned()
+            s: "foo".to_owned(),
         };
-       let r = convert_struct(s.clone());
-       let expected =  RustStruct {
-           u: (),
-           e: E::A,
-           m: HashMap::new(),
-           b: 42,
-           i: 1,
-           s: "foo".to_owned()
-       };
-       assert_eq!(r, expected);
-       let s2 = convert_struct_back(r);
-       assert_eq!(s2, s);
-   }
+        let r = convert_struct(s.clone());
+        let expected = RustStruct {
+            u: (),
+            e: E::A,
+            m: HashMap::new(),
+            b: 42,
+            i: 1,
+            s: "foo".to_owned(),
+        };
+        assert_eq!(r, expected);
+        let s2 = convert_struct_back(r);
+        assert_eq!(s2, s);
+    }
 }
