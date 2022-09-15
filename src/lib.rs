@@ -4,7 +4,7 @@ mod michelson_map;
 mod michelson_types;
 pub mod prelude;
 
-pub use michelson::{Parser, install_parser};
+pub use michelson::{install_parser, Parser};
 pub use michelson_map::MichelsonMap;
 pub use michelson_types::*;
 

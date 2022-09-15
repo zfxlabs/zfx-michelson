@@ -19,30 +19,37 @@ pub type Bytes = String;
 /// Representation of [_Micheline_](http://tezos.gitlab.io/kathmandu/michelson.html?highlight=view#concrete-syntax) in Rust
 ///
 /// Note that this is a simplistic and future-proof representation,
-/// numbers as well as primitives are encoded as `String`s.
+/// numbers as well as primitives are encoded as `String`s, like in the JSON format.
 
 // TODO: simple values doesn't seem to support annotations in Micheline?
 // TODO: we could use Taquito to convert between JSON syntax and the 'normal' Micheline version
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Micheline {
-    Number { int: Number },
-    String { string: String },
-    Bytes { bytes: String },
-    Prim { prim: Primitive,
-           #[serde(default)]
-           #[serde(skip_serializing_if="Vec::is_empty")]
-           args: Vec<Micheline>,
-           #[serde(default)]
-           #[serde(skip_serializing_if="Vec::is_empty")]
-           annots: Annotations
+    Number {
+        int: Number,
     },
-    Seq(Vec<Micheline>)
+    String {
+        string: String,
+    },
+    Bytes {
+        bytes: String,
+    },
+    Prim {
+        prim: Primitive,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        args: Vec<Micheline>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        annots: Annotations,
+    },
+    Seq(Vec<Micheline>),
 }
 
 impl Micheline {
-   // TODO: add constructors for each variant
-   // TODO: we could add functions checking for the variants and extracting values, also functions for walking the structure
+    // TODO: add constructors for each variant
+    // TODO: we could add functions checking for the variants and extracting values, also functions for walking the structure
 
     /// Convert a [`serde_json::Value`] to `Micheline`
     ///
@@ -69,8 +76,8 @@ impl Micheline {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use super::Micheline::*;
+    use super::*;
 
     #[test]
     fn test_micheline_basic_type() {
@@ -80,8 +87,12 @@ mod test {
 
         let m = Prim {
             prim: "map".to_string(),
-            args: vec![Prim{ prim: "string".to_string(), args:vec![], annots:vec![]}],
-            annots: vec![]
+            args: vec![Prim {
+                prim: "string".to_string(),
+                args: vec![],
+                annots: vec![],
+            }],
+            annots: vec![],
         };
         println!("{:?}", m);
         let s = m.to_string().unwrap();
