@@ -22,7 +22,7 @@ pub type Bytes = String;
 /// numbers as well as primitives are encoded as `String`s, like in the JSON format.
 
 // TODO: simple values doesn't seem to support annotations in Micheline?
-// TODO: we could use Taquito to convert between JSON syntax and the 'normal' Micheline version
+// TODO: we could use Taquito to convert between JSON syntax and the 'normal' Micheline version, see https://github.com/zfxlabs/zfx-michelson/issues/4
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Micheline {

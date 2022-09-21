@@ -1,6 +1,6 @@
 /*
   JSON <-> Taquito converter.
-  
+
   Taquito uses several non-serialisable data types, this module aims
   to convert those to JSON in both directions.
 
@@ -66,6 +66,7 @@ const decode_top_map = (data) =>
 */
 
 const is_decoded_map = (data) =>
+  data !== null &&
   typeof data === "object" &&
   data["MichelsonMap"] !== undefined &&
   isSingleton(data);
