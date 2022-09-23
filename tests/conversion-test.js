@@ -58,99 +58,99 @@ function test_enum() {
   print("back", back);
   assert.deepStrictEqual(back, data);
 }
+const register_schema = {
+  prim: "pair",
+  args: [
+    {
+      prim: "pair",
+      args: [
+        {
+          prim: "pair",
+          args: [
+            {
+              prim: "big_map",
+              args: [
+                { prim: "key_hash" },
+                {
+                  prim: "list",
+                  args: [
+                    {
+                      prim: "pair",
+                      args: [
+                        {
+                          prim: "pair",
+                          args: [
+                            {
+                              prim: "pair",
+                              args: [
+                                {
+                                  prim: "key_hash",
+                                  annots: ["%baking_account"],
+                                },
+                                { prim: "key", annots: ["%public_key"] },
+                              ],
+                            },
+                            { prim: "bytes", annots: ["%tls_cert"] },
+                          ],
+                        },
+                        { prim: "timestamp" },
+                      ],
+                    },
+                  ],
+                },
+              ],
+              annots: ["%old_validator_map"],
+            },
+            {
+              prim: "set",
+              args: [{ prim: "key_hash" }],
+              annots: ["%old_validators"],
+            },
+          ],
+        },
+        { prim: "address", annots: ["%owner"] },
+        {
+          prim: "or",
+          args: [
+            {
+              prim: "or",
+              args: [
+                { prim: "unit", annots: ["%genesis"] },
+                { prim: "unit", annots: ["%open"] },
+              ],
+            },
+            { prim: "unit", annots: ["%sealed"] },
+          ],
+          annots: ["%state"],
+        },
+      ],
+    },
+    {
+      prim: "big_map",
+      args: [
+        { prim: "key_hash" },
+        {
+          prim: "pair",
+          args: [
+            {
+              prim: "pair",
+              args: [
+                { prim: "key_hash", annots: ["%baking_account"] },
+                { prim: "key", annots: ["%public_key"] },
+              ],
+            },
+            { prim: "bytes", annots: ["%tls_cert"] },
+          ],
+        },
+      ],
+      annots: ["%validator_map"],
+    },
+    { prim: "set", args: [{ prim: "key_hash" }], annots: ["%validators"] },
+  ],
+};
 
 function test_register_storage() {
-  const sch = {
-    prim: "pair",
-    args: [
-      {
-        prim: "pair",
-        args: [
-          {
-            prim: "pair",
-            args: [
-              {
-                prim: "big_map",
-                args: [
-                  { prim: "key_hash" },
-                  {
-                    prim: "list",
-                    args: [
-                      {
-                        prim: "pair",
-                        args: [
-                          {
-                            prim: "pair",
-                            args: [
-                              {
-                                prim: "pair",
-                                args: [
-                                  {
-                                    prim: "key_hash",
-                                    annots: ["%baking_account"],
-                                  },
-                                  { prim: "key", annots: ["%public_key"] },
-                                ],
-                              },
-                              { prim: "bytes", annots: ["%tls_cert"] },
-                            ],
-                          },
-                          { prim: "timestamp" },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-                annots: ["%old_validator_map"],
-              },
-              {
-                prim: "set",
-                args: [{ prim: "key_hash" }],
-                annots: ["%old_validators"],
-              },
-            ],
-          },
-          { prim: "address", annots: ["%owner"] },
-          {
-            prim: "or",
-            args: [
-              {
-                prim: "or",
-                args: [
-                  { prim: "unit", annots: ["%genesis"] },
-                  { prim: "unit", annots: ["%open"] },
-                ],
-              },
-              { prim: "unit", annots: ["%sealed"] },
-            ],
-            annots: ["%state"],
-          },
-        ],
-      },
-      {
-        prim: "big_map",
-        args: [
-          { prim: "key_hash" },
-          {
-            prim: "pair",
-            args: [
-              {
-                prim: "pair",
-                args: [
-                  { prim: "key_hash", annots: ["%baking_account"] },
-                  { prim: "key", annots: ["%public_key"] },
-                ],
-              },
-              { prim: "bytes", annots: ["%tls_cert"] },
-            ],
-          },
-        ],
-        annots: ["%validator_map"],
-      },
-      { prim: "set", args: [{ prim: "key_hash" }], annots: ["%validators"] },
-    ],
-  };
-  // print("complex schema:", JSON.stringify(sch, null, 2));
+  // print("complex schema:", JSON.stringify(register_schema, null, 2));
   /*
   {
     state = Genesis;
@@ -236,16 +236,188 @@ function test_register_storage() {
       },
     ],
   };
-  const encoded = jsonEncode(sch, data);
+  const encoded = jsonEncode(register_schema, data);
   print("encoded", JSON.stringify(encoded));
   assert.deepStrictEqual(encoded, expected);
 
-  const back = jsonDecode(sch, encoded);
+  const back = jsonDecode(register_schema, encoded);
   print("back", back);
   print(
     "back value",
     JSON.stringify(
       back.validator_map.MichelsonMap.tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c
+    )
+  );
+  assert.deepStrictEqual(back, data);
+}
+
+function test_history_map() {}
+
+function test_register_schema_with_history() {
+  const data = {
+    state: { __enum__: "Genesis" },
+    owner: "tz1burnburnburnburnburnburnburjAYjjX",
+    validators: ["tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c"],
+    old_validators: ["tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c"],
+    old_validator_map: {
+      MichelsonMap: {
+        tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c: [
+          {
+            baking_account: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+            public_key:
+              "edpku2tvek7QFRYm12819P8RwSY8m7zSzKV9RMnWHy3xVbrBwN5zAg",
+            tls_cert: "",
+            // Taquito returns timestamps with fractions of seconds: `.000`
+            3: "2022-09-23T00:00:00.000Z",
+          },
+        ],
+      },
+    },
+    validator_map: {
+      MichelsonMap: {
+        tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c: {
+          baking_account: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+          public_key: "edpku2tvek7QFRYm12819P8RwSY8m7zSzKV9RMnWHy3xVbrBwN5zAg",
+          tls_cert: "",
+        },
+      },
+    },
+  };
+
+  // This is the output of Taquito, not the version generated by the Ligo compiler,
+  // the latter is using the `Pair` constructor with more than two arguments
+  const expected = {
+    prim: "Pair",
+    args: [
+      {
+        prim: "Pair",
+        args: [
+          {
+            prim: "Pair",
+            args: [
+              [
+                {
+                  prim: "Elt",
+                  args: [
+                    {
+                      string: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+                    },
+                    [
+                      {
+                        prim: "Pair",
+                        args: [
+                          {
+                            prim: "Pair",
+                            args: [
+                              {
+                                prim: "Pair",
+                                args: [
+                                  {
+                                    string:
+                                      "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+                                  },
+                                  {
+                                    string:
+                                      "edpku2tvek7QFRYm12819P8RwSY8m7zSzKV9RMnWHy3xVbrBwN5zAg",
+                                  },
+                                ],
+                              },
+                              {
+                                bytes: "",
+                              },
+                            ],
+                          },
+                          {
+                            string: "2022-09-23T00:00:00.000Z",
+                          },
+                        ],
+                      },
+                    ],
+                  ],
+                },
+              ],
+              [
+                {
+                  string: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+                },
+              ],
+            ],
+          },
+          {
+            prim: "Pair",
+            args: [
+              {
+                string: "tz1burnburnburnburnburnburnburjAYjjX",
+              },
+              {
+                prim: "Left",
+                args: [
+                  {
+                    prim: "Left",
+                    args: [
+                      {
+                        prim: "Unit",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        prim: "Pair",
+        args: [
+          [
+            {
+              prim: "Elt",
+              args: [
+                {
+                  string: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+                },
+                {
+                  prim: "Pair",
+                  args: [
+                    {
+                      prim: "Pair",
+                      args: [
+                        {
+                          string: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+                        },
+                        {
+                          string:
+                            "edpku2tvek7QFRYm12819P8RwSY8m7zSzKV9RMnWHy3xVbrBwN5zAg",
+                        },
+                      ],
+                    },
+                    {
+                      bytes: "",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          [
+            {
+              string: "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c",
+            },
+          ],
+        ],
+      },
+    ],
+  };
+  const encoded = jsonEncode(register_schema, data);
+  //print("encoded", JSON.stringify(encoded, null, 2));
+  assert.deepStrictEqual(encoded, expected);
+
+  const back = jsonDecode(register_schema, encoded);
+  print("back", back);
+  print(
+    "back value",
+    JSON.stringify(
+      back.old_validator_map.MichelsonMap.tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c
     )
   );
   assert.deepStrictEqual(back, data);
@@ -329,6 +501,38 @@ function test_enum_with_parameter_in_record() {
   const back2 = jsonDecode(sch, encoded2);
   print("back", back2);
   assert.deepStrictEqual(back2, data2);
+}
+
+function test_record_in_record() {
+  const sch = {
+    prim: "pair",
+    args: [
+      { prim: "int", annots: ["%a"] },
+      {
+        prim: "pair",
+        args: [
+          { prim: "int", annots: ["%c"] },
+          { prim: "int", annots: ["%d"] },
+        ],
+        annots: ["%b"],
+      },
+    ],
+  };
+  const data = {
+    a: "0",
+    b: { c: "2", d: "3" },
+  };
+  const expected = {
+    prim: "Pair",
+    args: [{ int: "0" }, { prim: "Pair", args: [{ int: "2" }, { int: "3" }] }],
+  };
+  const encoded = jsonEncode(sch, data);
+  print("encoded", JSON.stringify(encoded));
+  assert.deepStrictEqual(encoded, expected);
+
+  const back = jsonDecode(sch, encoded);
+  print("back", back);
+  assert.deepStrictEqual(back, data);
 }
 
 function test_adt() {
@@ -455,8 +659,10 @@ test_unit();
 test_map();
 test_enum();
 test_register_storage();
+test_register_schema_with_history();
 test_enum_with_parameter();
 test_enum_with_parameter_in_record();
+test_record_in_record();
 test_adt();
 test_option();
 test_option_in_record();
