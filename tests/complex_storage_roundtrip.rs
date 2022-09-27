@@ -183,6 +183,7 @@ enum State {
     Sealed,
     Open,
 }
+impl EncodeableEnum for State {}
 
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 struct Registration {

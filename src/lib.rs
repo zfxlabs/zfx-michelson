@@ -3,8 +3,8 @@
 
 pub mod micheline;
 pub mod michelson;
-mod michelson_map;
-mod michelson_types;
+pub mod michelson_map;
+pub mod michelson_types;
 pub mod prelude;
 
 pub use michelson::{install_parser, Parser};
@@ -20,6 +20,9 @@ pub enum Error {
     IdMismatch,
     EncodeError { error: Value },
     DecodeError { error: Value },
+    JsonError(serde_json::Error),
+    NoSchema,
+    EncodingError(String),
 }
 
 impl std::error::Error for Error {}
@@ -35,5 +38,11 @@ impl std::fmt::Display for Error {
 impl std::convert::From<std::io::Error> for Error {
     fn from(error: std::io::Error) -> Self {
         Error::IoError(error)
+    }
+}
+
+impl std::convert::From<serde_json::Error> for Error {
+    fn from(error: serde_json::Error) -> Self {
+        Error::JsonError(error)
     }
 }

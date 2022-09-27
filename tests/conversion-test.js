@@ -650,6 +650,20 @@ function test_option_in_record() {
   assert.deepStrictEqual(back2, data_none);
 }
 
+function test_bool() {
+  const sch = { prim: "bool" };
+  const data = true;
+  const expected = { prim: "True" };
+
+  const encoded = jsonEncode(sch, data);
+  print("encoded", JSON.stringify(encoded));
+  assert.deepStrictEqual(encoded, expected);
+
+  const back = jsonDecode(sch, encoded);
+  print("back", back);
+  assert.deepStrictEqual(back, data);
+}
+
 function fail() {
   assert.deepStrictEqual(0, 1);
 }
@@ -666,3 +680,4 @@ test_record_in_record();
 test_adt();
 test_option();
 test_option_in_record();
+test_bool();
