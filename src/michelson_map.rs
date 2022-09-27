@@ -9,7 +9,9 @@ use std::ops::{Deref, DerefMut};
 
 use serde::{Deserialize, Serialize};
 
-use crate::michelson_types::JsonWrapper;
+use crate::michelson_types::JsonWrapped;
+
+use crate::Result;
 
 /// `MichelsonMap` is a simple newtype over `HashMap` with a different serialisation format.
 ///
@@ -138,21 +140,28 @@ where
     }
 }
 
-impl<K, V> JsonWrapper for HashMap<K, V>
+impl<K, V> JsonWrapped for HashMap<K, V>
 where
-    K: PartialEq + Eq + Hash + Clone,
-    V: Clone,
+    K: PartialEq + Eq + Hash + Clone + JsonWrapped,
+    V: JsonWrapped,
+    <K as JsonWrapped>::JsonType: PartialEq + Eq + Hash,
 {
-    type JsonType = MichelsonMap<K, V>;
+    type JsonType = MichelsonMap<<K as JsonWrapped>::JsonType, <V as JsonWrapped>::JsonType>;
 
-    fn to_wrapped_json(&self) -> Self::JsonType {
-        MichelsonMap {
-            inner: self.clone(),
+    fn to_wrapped_json(&self) -> Result<Self::JsonType> {
+        let mut inner = HashMap::new();
+        for (k, v) in self.iter() {
+            let _ = inner.insert(k.to_wrapped_json()?, v.to_wrapped_json()?);
         }
+        Ok(MichelsonMap { inner })
     }
 
-    fn from_wrapped_json(value: &Self::JsonType) -> Self {
-        value.inner.clone()
+    fn from_wrapped_json(value: &Self::JsonType) -> Result<Self> {
+        let mut map = HashMap::new();
+        for (k, v) in value.inner.iter() {
+            let _ = map.insert(K::from_wrapped_json(k)?, V::from_wrapped_json(v)?);
+        }
+        Ok(map)
     }
 }
 
