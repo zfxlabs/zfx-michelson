@@ -5,7 +5,6 @@ pub mod micheline;
 pub mod michelson;
 pub mod michelson_map;
 pub mod michelson_types;
-pub mod prelude;
 
 pub use michelson::{install_parser, Parser};
 pub use michelson_map::MichelsonMap;
