@@ -1,3 +1,4 @@
+//! The main decoder/encoder ([`Parser`])
 use crate::{Error, Result};
 
 use serde::{Deserialize, Serialize};
@@ -42,6 +43,9 @@ pub enum ResponseContent {
     Error { error: Value },
 }
 
+/// Install the necessary Javascript code in the current directory
+///
+/// This step is needed before creating a [`Parser`]
 pub async fn install_parser() {
     let parser_js = SCRIPTS_DIR.get_file(BUNDLE_NAME).unwrap();
     let mut file_to_deploy = File::create(BUNDLE_NAME).await.unwrap();
@@ -51,6 +55,22 @@ pub async fn install_parser() {
         .unwrap();
 }
 
+/// The main decoder/encoder backed by a NodeJS process using Taquito
+///
+/// NodeJS must be installed on the system,
+/// in particular the `node` binary must be present in the `PATH`
+///
+/// ## Examples
+/// See the [crate-level documentation](crate).
+///
+/// ## Panics
+///
+/// - [`new`](Parser::new) panics if the child process cannot be started
+/// - [`encode`](Parser::encode) and [`decode`](Parser::decode) may panic
+///   on I/O error (most likely, when the child process exited)
+// TODO: unusual race conditions with concurrent calls to the same parser may cause an [`Error::IdMismatch`] result.
+// If this is observed in practice, we can match respective request and response IDs to avoid this
+
 pub struct Parser {
     stdin: ChildStdin,
     stdout: ChildStdout,
@@ -58,6 +78,7 @@ pub struct Parser {
 }
 
 impl Parser {
+    /// Create a new `Parser` instance, **this starts a new NodeJS process**
     pub fn new() -> Parser {
         let mut child = Command::new("node")
             //.current_dir("./scripts")
@@ -75,6 +96,8 @@ impl Parser {
         }
     }
 
+    /// Encode a [value][`serde_json::Value] to the JSON-based Michelson format
+    /// according to the data schema provided
     pub async fn encode(
         &mut self,
         data: Value,
@@ -94,6 +117,8 @@ impl Parser {
         }
     }
 
+    /// Decode a [value][`serde_json::Value] from the JSON-based Michelson format
+    /// according to the data schema provided
     pub async fn decode(
         &mut self,
         michelson: MichelsonV1Expression,
@@ -112,6 +137,9 @@ impl Parser {
             ResponseContent::Error { error } => Err(Error::DecodeError { error }),
         }
     }
+
+    // TODO `drop`: technically we'd need to kill the child process explicitly,
+    // or verify whether the NodeJS process exits cleanly on closing `stdin`
 }
 
 async fn submit(stdin: &mut ChildStdin, id: usize, content: RequestContent) {

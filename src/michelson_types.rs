@@ -1,4 +1,15 @@
-//! Various JSON-serialisable types that need special encoding logic with Taquito
+//! Types, traits and macros for conversion between Rust and Taquito-style JSON data.
+//!
+//! This module works in tandem with the javascript pre-/postprocessor in `src/json_converter.js`.
+//!
+//! ## Caveats
+//!
+//! - all types are expected to implement `PartialEq + Eq + Debug + Clone + serde::Serialize + serde::Deserialize`
+//! - Tuples and tuple `enum`s are to be avoided due to their representation
+//!    being indistinguishable from that of `struct`s/`record`s in the Michelson schema
+//! - Record `enum`s need the explicit `#[serde(rename_all = "camelCase")]` annotiation
+//!   to comply with Michelson naming conventions
+
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json;
 use std::collections::HashSet;
@@ -11,8 +22,25 @@ use crate::Result;
 pub type JsonBigNumber = String;
 
 /// Trait to wrap and unwrap a type from the Taquito/Tezos-specific format
+///
+/// Implementations are provided for most types that can appear in Michelson or Ligo.
+/// It's expected that only application-specific datataypes (generally `struct`s) need a manual
+/// implementation. See [`wrapped_struct!`].
+///
+/// Usually it's more convenient to use the provided generic functions
+// (`to_wrapped_* and `from_wrapped_*`) from this module
+/// than the trait functions directly.
 pub trait JsonWrapped: Clone {
+    /// The transport type that can be serialised to JSON, used with Taquito,
+    /// and mapped to the Michelson data schema.
+    ///
+    /// Note that this should still be a _plain Rust type_ that result
+    // in the expected JSON format when serialised.
     type JsonType;
+
+    /// The Michelson data schema if available, the empty string otherwise.
+    ///
+    /// Implementors should provide it if it's known at compile-time and access it using [`get_schema`](JsonWrapped::get_schema).
     const SCHEMA_STR: &'static str = "";
 
     fn to_wrapped_json(&self) -> Result<Self::JsonType>;
@@ -28,14 +56,17 @@ pub trait JsonWrapped: Clone {
     }
 }
 
+/// Generic helper function for the implementors of [`JsonWrapped`] trait
 pub fn from_wrapped_json<T: JsonWrapped>(v: &T::JsonType) -> Result<T> {
     T::from_wrapped_json(v)
 }
 
+/// Generic helper function for the implementors of [`JsonWrapped`] trait
 pub fn to_wrapped_json<T: JsonWrapped>(t: &T) -> Result<T::JsonType> {
     t.to_wrapped_json()
 }
 
+/// Generic helper function for the implementors of [`JsonWrapped`] trait
 pub fn from_wrapped_str<T: JsonWrapped>(s: &str) -> Result<T>
 where
     <T as JsonWrapped>::JsonType: DeserializeOwned,
@@ -44,6 +75,7 @@ where
     Ok(T::from_wrapped_json(&x)?)
 }
 
+/// Generic helper function for the implementors of [`JsonWrapped`] trait
 pub fn to_wrapped_string<T: JsonWrapped>(t: &T) -> Result<String>
 where
     <T as JsonWrapped>::JsonType: Serialize,
@@ -52,6 +84,7 @@ where
     Ok(serde_json::to_string(&x)?)
 }
 
+/// Generic helper function for the implementors of [`JsonWrapped`] trait
 pub fn from_wrapped_value<T: JsonWrapped>(v: serde_json::Value) -> Result<T>
 where
     <T as JsonWrapped>::JsonType: DeserializeOwned,
@@ -60,6 +93,7 @@ where
     Ok(T::from_wrapped_json(&x)?)
 }
 
+/// Generic helper function for the implementors of [`JsonWrapped`] trait
 pub fn to_wrapped_value<T: JsonWrapped>(t: T) -> Result<serde_json::Value>
 where
     <T as JsonWrapped>::JsonType: Serialize,
@@ -136,6 +170,7 @@ impl<E: EncodeableEnum> From<E> for JsonEnum<E> {
     }
 }
 
+/// Marker trait for simple `enum`  types for auto-implementing the [`JsonWrapped`] trait
 pub trait EncodeableEnum: Clone {}
 
 impl<E: EncodeableEnum> JsonWrapped for E {
@@ -290,7 +325,33 @@ json_wrapper!(usize as String);
 json_wrapper!(bool as Self);
 json_wrapper!(char as Self);
 
-//todo pub?
+/// Macro to derive the `JsonWrapped` trait  for Rust `struct`
+///
+/// All fields must already implement the trait for the macro to work.
+///
+/// ## Example
+///
+/// ```
+/// use zfx_michelson::*;
+///
+/// // The source LIGO record `{ int: int; string: string }`
+/// pub const SCHEMA: &str = r#"
+///    { "prim": "pair", "args":
+///            [ { "prim": "int", "annots": [ "%int" ] },
+///              { "prim": "string", "annots": [ "%string" ] } ] } "#;
+///
+/// wrapped_struct! {
+///     // creates a `pub struct`
+///     Struct {
+///        int: isize,
+///        string: String,
+///      }
+///      // also a `pub struct`, usable independently
+///      as WrappedStruct
+///      // The matching Michelson schema
+///      with_schema SCHEMA
+/// }
+/// ```
 #[macro_export]
 macro_rules! wrapped_struct{
     { $name:ident { $($field:ident : $type:ty),* } as $jname:ident with_schema $schema:expr} => {
@@ -300,7 +361,7 @@ macro_rules! wrapped_struct{
         }
         #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, PartialEq)]
         pub struct $jname {
-          $($field: <$type as crate::JsonWrapped>::JsonType),*
+          $($field: <$type as $crate::JsonWrapped>::JsonType),*
         }
 
         impl $crate::JsonWrapped for $name {
