@@ -8,7 +8,7 @@ This library needs Node.js 16.
 
 ### Summary
 
-The library builds an Rust API layer around the `taquito` library. (See: https://tezostaquito.io/)
+The library builds an Rust API layer around the `taquito` library. (See: <https://tezostaquito.io/>)
 
 Taquito interfaces Tezos RPC nodes, a JS module implements a node.js process to handle communication via the standard input and standard output. The node.js process is started with `tokio::process::Command` and the Rust library encodes/decodes requests into JSON maps for each request-response pair.
 
@@ -38,3 +38,7 @@ let decoded = p.decode(storage, schema.clone()).await;
 ### Test
 
 `cargo test`
+
+### Documentation
+
+`cargo doc --open`

@@ -10,22 +10,28 @@ pub use michelson::{install_parser, Parser};
 pub use michelson_map::MichelsonMap;
 pub use michelson_types::*;
 
-use serde_json::value::Value; // FIXME: IDK if this is a good idea here
-
+/// Crate's `Error` type
 #[derive(Debug)]
 pub enum Error {
     IoError(std::io::Error),
     ReadNone,
     IdMismatch,
-    EncodeError { error: Value },
-    DecodeError { error: Value },
+    EncodeError {
+        error: serde_json::Value,
+    },
+    DecodeError {
+        error: serde_json::Value,
+    },
     JsonError(serde_json::Error),
+    /// Associated schema for the type is not  present, see [`JsonWrapped::SCHEMA_STR`]
     NoSchema,
+    /// Errors during converting a raw [`serde_json::Value`] to a Rust data type
     EncodingError(String),
 }
 
 impl std::error::Error for Error {}
 
+/// Crate's `Result` type
 pub type Result<T> = std::result::Result<T, Error>;
 
 impl std::fmt::Display for Error {
