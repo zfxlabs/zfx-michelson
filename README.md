@@ -31,6 +31,10 @@ let decoded = p.decode(storage, schema.clone()).await;
 
 ```
 
+----
+
+For a complete example of converting LIGO/Michelson data to Rust see the example under `./examples/bets/`.
+
 ### Build
 
 `cargo build`
