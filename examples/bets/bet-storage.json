@@ -1,0 +1,11 @@
+{ "prim": "Pair",
+  "args":
+    [ { "prim": "Pair",
+        "args":
+          [ [ { "prim": "Elt",
+                "args":
+                  [ { "string": "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c" },
+                    { "int": "42" } ] } ],
+            [ { "string": "tz1d8LSBpEsLtLkCmaj2yBdv2xF4wSYNAa8c" } ] ] },
+      { "int": "1" }, { "prim": "Right", "args": [ { "prim": "Unit" } ] } ] }
+
