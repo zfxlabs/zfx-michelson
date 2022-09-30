@@ -500,4 +500,17 @@ describe("Conversion tests", function() {
           const back2 = jsonDecode(sch, encoded2);
           assert.deepEqual(back2, data_none);
     });
+
+   it("test bool", function() {
+       const sch = { prim: "bool" };
+       const data = true;
+       const expected = { prim: "True" };
+
+       const encoded = jsonEncode(sch, data);
+       assert.deepEqual(encoded, expected);
+
+       const back = jsonDecode(sch, encoded);
+       assert.deepEqual(back, data);
+   });
+
 });
