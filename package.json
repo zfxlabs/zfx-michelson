@@ -1,6 +1,6 @@
 {
-  "name": "sidechain",
-  "version": "0.0.0",
+  "name": "zfx-michelson",
+  "version": "0.1.0",
   "license": "MIT",
   "dependencies": {
     "@taquito/rpc": "^11.2.0",
