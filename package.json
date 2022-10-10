@@ -4,7 +4,7 @@
   "license": "MIT",
   "author": "zero.fx <contact@zerofxlabs.com>",
   "exports": {
-    "./json-converter": "./src/json_converter.js"
+    "./json_converter.js": "./src/json_converter.js"
   },
   "dependencies": {
     "@taquito/rpc": "^11.2.0",
