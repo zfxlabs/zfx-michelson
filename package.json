@@ -1,7 +1,13 @@
 {
   "name": "zfx-michelson",
+  "description": "Michelson parser",
   "version": "0.1.0",
   "license": "MIT",
+  "author": "zero.fx <contact@zerofxlabs.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zfxlabs/zfx-michelson.git"
+  },
   "dependencies": {
     "@taquito/rpc": "^11.2.0",
     "@taquito/signer": "^11.2.0",
