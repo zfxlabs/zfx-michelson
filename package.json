@@ -5,7 +5,7 @@
   "author": "zero.fx <contact@zerofxlabs.com>",
   "type": "module",
   "exports": {
-    "json_converter": "./src/json_converter.js"
+    "./json_converter": "./src/json_converter.js"
   },
   "dependencies": {
     "@taquito/rpc": "^11.2.0",
