@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "author": "zero.fx <contact@zerofxlabs.com>",
+  "type": "module",
   "exports": {
     "json_converter": "./src/json_converter.js"
   },
