@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "license": "MIT",
   "author": "zero.fx <contact@zerofxlabs.com>",
-  "exports": "./src/json_converter.js",
+  "exports": {
+    "./json-converter": "./src/json_converter.js"
+  },
   "dependencies": {
     "@taquito/rpc": "^11.2.0",
     "@taquito/signer": "^11.2.0",
