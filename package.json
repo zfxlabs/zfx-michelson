@@ -2,6 +2,9 @@
   "name": "zfx-michelson",
   "version": "0.1.0",
   "license": "MIT",
+  "exports": {
+    "./src/json_converter": "./src/json_converter.js"
+  },
   "dependencies": {
     "@taquito/rpc": "^11.2.0",
     "@taquito/signer": "^11.2.0",
